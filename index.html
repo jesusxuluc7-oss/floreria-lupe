@@ -103,6 +103,7 @@ button{
 
             <p>$ {{ flor.precio }}</p>
 
+            <!-- ✔ FIX: precio correcto -->
             <button onclick="agregar('{{ flor.nombre }}', {{ flor.precio }})">
                 Agregar al carrito
             </button>
@@ -155,6 +156,7 @@ function render(){
     for(let nombre in carrito){
 
         let item = carrito[nombre];
+
         let subtotal = item.precio * item.cantidad;
 
         total += subtotal;

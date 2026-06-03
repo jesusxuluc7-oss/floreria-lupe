@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 
-# 🔌 MongoDB (seguro para Render)
+# 🔌 MongoDB seguro
 uri = os.getenv("MONGO_URI")
 
 if not uri:
@@ -15,10 +15,11 @@ cliente = MongoClient(uri, serverSelectionTimeoutMS=5000)
 db = cliente["floreria_lupe"]
 productos_collection = db["productos"]
 
-# 🏠 HOME (LIMITADO para evitar crash de memoria)
+# 🏠 HOME (OPTIMIZADO para Render FREE)
 @app.route("/")
 def home():
-    productos = list(productos_collection.find().limit(12))  # 🔥 FIX RAM
+    # 🔥 SOLO 10 PRODUCTOS (evita crash de RAM)
+    productos = productos_collection.find().limit(10)
     return render_template("index.html", productos=productos)
 
 # 📦 PEDIDOS
@@ -26,12 +27,12 @@ def home():
 def procesar_pedido():
     pedido = request.get_json()
 
-    print("Pedido:", pedido)
+    print("Pedido recibido:", pedido)
 
     return jsonify({
         "mensaje": "Pedido recibido correctamente"
     })
 
-# 🚀 RUN (solo local, Render usa gunicorn)
+# 🚀 SOLO LOCAL
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

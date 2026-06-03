@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request, jsonify
 from pymongo import MongoClient
+import os
 
 app = Flask(__name__)
 
-# Conexión a MongoDB local
-cliente = MongoClient("mongodb://localhost:27017/")
+# Conexión a MongoDB Atlas (Render usa variable de entorno)
+uri = os.getenv("MONGO_URI")
+cliente = MongoClient(uri)
 
 # Base de datos
 db = cliente["floreria_lupe"]

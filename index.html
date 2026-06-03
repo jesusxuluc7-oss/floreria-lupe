@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Florería Lupe</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:#fcf8f2;
+}
+
+header{
+    background:#b8263a;
+    color:white;
+    text-align:center;
+    padding:20px;
+    font-size:26px;
+}
+
+.contenedor{
+    display:flex;
+    gap:20px;
+    padding:20px;
+    max-width:1400px;
+    margin:auto;
+}
+
+.productos{
+    flex:3;
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:15px;
+}
+
+.card{
+    background:white;
+    padding:15px;
+    border-radius:12px;
+    text-align:center;
+    box-shadow:0 3px 10px rgba(0,0,0,.1);
+}
+
+.card img{
+    width:100%;
+    height:180px;
+    object-fit:cover;
+    border-radius:8px;
+}
+
+button{
+    background:#b8263a;
+    color:white;
+    border:none;
+    padding:10px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.carrito{
+    flex:1;
+    background:white;
+    padding:15px;
+    border-radius:12px;
+    height:max-content;
+}
+
+.item{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:10px;
+}
+
+.total{
+    font-weight:bold;
+    margin-top:15px;
+}
+
+@media(max-width:768px){
+    .contenedor{
+        flex-direction:column;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>🌷 Florería Lupe</header>
+
+<div class="contenedor">
+
+<div class="productos">
+
+{% for flor in productos %}
+<div class="card">
+
+<img src="{{ flor.imagen }}" alt="{{ flor.nombre }}">
+
+<h3>{{ flor.nombre }}</h3>
+
+<p>$ {{ flor.precio }}</p>
+
+<button onclick="agregar('{{ flor.nombre }}', { florprecio })">
+Agregar al carrito
+</button>
+
+</div>
+{% endfor %}
+
+</div>
+
+<div class="carrito">
+
+<h3>🛒 Carrito</h3>
+
+<div id="lista"></div>
+
+<p class="total" id="total">
+Total: $0
+</p>
+
+<button onclick="pagar()">
+Finalizar compra
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+let carrito = {};
+let total = 0;
+
+function agregar(nombre, precio){
+
+    if(carrito[nombre]){
+        carrito[nombre].cantidad++;
+    }else{
+        carrito[nombre] = {
+            precio: precio,
+            cantidad: 1
+        };
+    }
+
+    render();
+}
+
+function render(){
+
+    let lista = document.getElementById("lista");
+
+    lista.innerHTML = "";
+
+    total = 0;
+
+    for(let nombre in carrito){
+
+        let item = carrito[nombre];
+
+        let subtotal = item.precio * item.cantidad;
+
+        total += subtotal;
+
+        lista.innerHTML += `
+            <div class="item">
+                <span>${nombre} x${item.cantidad}</span>
+                <span>$${subtotal}</span>
+            </div>
+        `;
+    }
+
+    document.getElementById("total").innerText =
+        "Total: $" + total;
+}
+
+function pagar(){
+
+    fetch("/procesar-pedido",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            items:carrito,
+            total:total
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.mensaje);
+    });
+}
+
+</script>
+
+</body>
+</html>

@@ -4,45 +4,51 @@ import os
 
 app = Flask(__name__)
 
-# 🔌 MongoDB Atlas
+# 🔌 Mongo seguro
 uri = os.getenv("MONGO_URI")
 
-if not uri:
-    raise Exception("MONGO_URI no está configurada en Render")
+cliente = None
+db = None
+productos_collection = []
 
-cliente = MongoClient(uri, serverSelectionTimeoutMS=5000)
+if uri:
+    try:
+        cliente = MongoClient(uri, serverSelectionTimeoutMS=5000)
+        db = cliente["floreria_lupe"]
+        productos_collection = db["productos"]
+        print("MongoDB conectado")
+    except Exception as e:
+        print("Error MongoDB:", e)
+else:
+    print("MONGO_URI no encontrada")
 
-db = cliente["floreria_lupe"]
-productos_collection = db["productos"]
 
-# 🏠 HOME
 @app.route("/")
 def home():
     try:
-        productos = list(productos_collection.find().limit(10))
+        productos = []
+        if productos_collection is not None:
+            productos = list(productos_collection.find().limit(10))
+
         return render_template("index.html", productos=productos)
+
     except Exception as e:
-        print("Error en / :", e)
-        return "Error cargando productos", 500
+        print("Error en /:", e)
+        return "Error interno", 500
 
 
-# 📦 PEDIDO
 @app.route("/procesar-pedido", methods=["POST"])
 def procesar_pedido():
     try:
         pedido = request.get_json()
+        print("Pedido:", pedido)
 
-        print("Pedido recibido:", pedido)
-
-        return jsonify({
-            "mensaje": "Pedido recibido correctamente"
-        })
+        return jsonify({"mensaje": "OK"})
 
     except Exception as e:
-        print("Error en pedido:", e)
-        return jsonify({"error": "Error procesando pedido"}), 500
+        print("Error pedido:", e)
+        return jsonify({"error": "fallo"}), 500
 
 
-# 🚀 RUN LOCAL (Render usa Gunicorn, esto no afecta producción)
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)

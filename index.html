@@ -9,7 +9,7 @@
 <style>
 body{
     margin:0;
-    font-family:Arial, sans-serif;
+    font-family: Arial, sans-serif;
     background:#fcf8f2;
 }
 
@@ -93,41 +93,39 @@ button{
 
 <div class="contenedor">
 
-<div class="productos">
+    <div class="productos">
 
-{% for flor in productos %}
-<div class="card">
+        {% for flor in productos %}
+        <div class="card">
 
-<img src="{{ flor.imagen }}" alt="{{ flor.nombre }}">
+            <img src="{{ flor.imagen }}" alt="{{ flor.nombre }}">
 
-<h3>{{ flor.nombre }}</h3>
+            <h3>{{ flor.nombre }}</h3>
 
-<p>$ {{ flor.precio }}</p>
+            <p>$ {{ flor.precio }}</p>
 
-<button onclick="agregar('{{ flor.nombre }}', { florprecio })">
-Agregar al carrito
-</button>
+            <button onclick="agregar('{{ flor.nombre }}', {{ flor.precio }})">
+                Agregar al carrito
+            </button>
 
-</div>
-{% endfor %}
+        </div>
+        {% endfor %}
 
-</div>
+    </div>
 
-<div class="carrito">
+    <div class="carrito">
 
-<h3>🛒 Carrito</h3>
+        <h3>🛒 Carrito</h3>
 
-<div id="lista"></div>
+        <div id="lista"></div>
 
-<p class="total" id="total">
-Total: $0
-</p>
+        <p class="total" id="total">Total: $0</p>
 
-<button onclick="pagar()">
-Finalizar compra
-</button>
+        <button onclick="pagar()">
+            Finalizar compra
+        </button>
 
-</div>
+    </div>
 
 </div>
 
@@ -140,9 +138,9 @@ function agregar(nombre, precio){
 
     if(carrito[nombre]){
         carrito[nombre].cantidad++;
-    }else{
+    } else {
         carrito[nombre] = {
-            precio: precio,
+            precio: Number(precio),
             cantidad: 1
         };
     }
@@ -153,7 +151,6 @@ function agregar(nombre, precio){
 function render(){
 
     let lista = document.getElementById("lista");
-
     lista.innerHTML = "";
 
     total = 0;
@@ -161,7 +158,6 @@ function render(){
     for(let nombre in carrito){
 
         let item = carrito[nombre];
-
         let subtotal = item.precio * item.cantidad;
 
         total += subtotal;
@@ -180,20 +176,23 @@ function render(){
 
 function pagar(){
 
-    fetch("/procesar-pedido",{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
+    fetch("/procesar-pedido", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
         },
-        body:JSON.stringify({
-            items:carrito,
-            total:total
+        body: JSON.stringify({
+            items: carrito,
+            total: total
         })
     })
     .then(res => res.json())
     .then(data => {
         alert(data.mensaje);
+        carrito = {};
+        render();
     });
+
 }
 
 </script>
